@@ -13,8 +13,9 @@ class AgendaForm extends StatefulWidget {
 class _AgendaFormState extends State<AgendaForm> {
   final _formKey = GlobalKey<FormState>();
   final _judul = TextEditingController();
-
-   final _ket = TextEditingController();
+  final _ket = TextEditingController();
+  final _alamat = TextEditingController();
+  final _jam = TextEditingController(); 
   final _service = AgendaService();
 
   @override
@@ -23,6 +24,8 @@ class _AgendaFormState extends State<AgendaForm> {
     if (widget.agenda != null) {
       _judul.text = widget.agenda!.judul;
       _ket.text = widget.agenda!.keterangan;
+      _alamat.text = widget.agenda!.alamat;
+      _jam.text = widget.agenda!.jam; 
     }
   }
 
@@ -32,6 +35,8 @@ class _AgendaFormState extends State<AgendaForm> {
         id: widget.agenda?.id,
         judul: _judul.text,
         keterangan: _ket.text,
+        alamat: _alamat.text,
+        jam: _jam.text, 
       );
       try {
         if (widget.agenda == null) {
@@ -54,7 +59,7 @@ class _AgendaFormState extends State<AgendaForm> {
       appBar: AppBar(
         title: Text(widget.agenda == null ? 'Tambah Agenda' : 'Edit Agenda'),
       ),
-        body: Padding(
+      body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
@@ -70,6 +75,36 @@ class _AgendaFormState extends State<AgendaForm> {
                 controller: _ket,
                 decoration: const InputDecoration(labelText: 'Keterangan'),
               ),
+              TextFormField(
+                controller: _alamat,
+                decoration: const InputDecoration(labelText: 'Alamat'),
+                validator: (v) =>
+                    v == null || v.isEmpty ? 'Wajib isi alamat' : null,
+              ),
+             TextFormField(
+                controller: _jam,
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: 'Jam (hh:mm)',
+                  suffixIcon: Icon(Icons.access_time), // ikon jam
+                ),
+                validator: (v) =>
+                    v == null || v.isEmpty ? 'Wajib isi jam' : null,
+                onTap: () async {
+                  final TimeOfDay? picked = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (picked != null) {
+                    final formattedTime = picked
+                        .format(context); // otomatis sesuai format jam lokal
+                    setState(() {
+                      _jam.text = formattedTime;
+                    });
+                  }
+                },
+              ),
+
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submit,
